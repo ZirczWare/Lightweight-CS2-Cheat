@@ -234,7 +234,7 @@ void Overlay::Run()
 
         if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
         {
-                Popup::Error("Couldn't attach to CS2");
+                Popup::Error("Couldn't attach overlay to CS2");
                 return;
         }
 

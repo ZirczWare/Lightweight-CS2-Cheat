@@ -153,6 +153,7 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Memory\Memory.cpp" />
     <ClCompile Include="Overlay\Overlay.cpp" />
     <ClCompile Include="Popup\Popup.cpp" />
   </ItemGroup>
@@ -167,6 +168,7 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="ImGui\imstb_rectpack.h" />
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
+    <ClInclude Include="Memory\Memory.h" />
     <ClInclude Include="Overlay\Overlay.h" />
     <ClInclude Include="Popup\Popup.h" />
   </ItemGroup>
