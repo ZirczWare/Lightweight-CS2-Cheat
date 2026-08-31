@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -70,6 +70,22 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\sohil\vcpkg\installed\x64-windows-static\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sohil\vcpkg\installed\x64-windows-static\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\sohil\vcpkg\installed\x64-windows-static\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sohil\vcpkg\installed\x64-windows-static\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -108,14 +124,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;
+      <AdditionalDependencies>Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
 d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
@@ -128,14 +145,15 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;
+      <AdditionalDependencies>Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
 d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
@@ -145,6 +163,7 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
   <ItemGroup>
     <ClCompile Include="Cheat\Cheat.cpp" />
     <ClCompile Include="Console\Console.cpp" />
+    <ClCompile Include="HTTP\HTTP.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
@@ -152,14 +171,17 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="JSON\JSON.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory\Memory.cpp" />
+    <ClCompile Include="Offsets\Offsets.cpp" />
     <ClCompile Include="Overlay\Overlay.cpp" />
     <ClCompile Include="Popup\Popup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cheat\Cheat.h" />
     <ClInclude Include="Console\Console.h" />
+    <ClInclude Include="HTTP\HTTP.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
     <ClInclude Include="ImGui\imgui_impl_dx11.h" />
@@ -168,7 +190,9 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="ImGui\imstb_rectpack.h" />
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
+    <ClInclude Include="JSON\JSON.h" />
     <ClInclude Include="Memory\Memory.h" />
+    <ClInclude Include="Offsets\Offsets.h" />
     <ClInclude Include="Overlay\Overlay.h" />
     <ClInclude Include="Popup\Popup.h" />
   </ItemGroup>

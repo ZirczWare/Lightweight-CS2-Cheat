@@ -54,6 +54,15 @@
     <ClCompile Include="Memory\Memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HTTP\HTTP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Offsets\Offsets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JSON\JSON.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console\Console.h">
@@ -93,6 +102,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Memory\Memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\HTTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Offsets\Offsets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSON\JSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

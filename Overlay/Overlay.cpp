@@ -14,6 +14,7 @@
 #include <Windows.h>
 #include <string>
 #include "../Cheat/Cheat.h"
+#include "../Offsets/Offsets.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -221,6 +222,20 @@ static bool UpdateTargetPeriodically()
         return true;
 }
 
+static bool HandleInits()
+{
+        bool Success;
+
+        Success = Offsets::Init();
+        if (!Success)
+        {
+                Popup::Error(Offsets::GetError());
+                return false;
+        }
+
+        return true;
+}
+
 void Overlay::Run()
 {
         ImGui_ImplWin32_EnableDpiAwareness();
@@ -234,7 +249,7 @@ void Overlay::Run()
 
         if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
         {
-                Popup::Error("Couldn't attach overlay to CS2");
+                Popup::Error("Couldn't attach overlay to target");
                 return;
         }
 
@@ -279,6 +294,10 @@ void Overlay::Run()
 
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 
+        bool SuccessfullyInited = HandleInits();
+        if (!SuccessfullyInited)
+                return;
+
         while (true)
         {
                 if (PeekMessageQuit())
@@ -298,7 +317,6 @@ void Overlay::Run()
                 ImGui::NewFrame();
 
                 Cheat::Run();
-                ImGui::ShowDemoWindow();
 
                 ImGui::Render();
 
