@@ -177,6 +177,7 @@ d3dcompiler.lib</AdditionalDependencies>
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="JSON\JSON.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\View.cpp" />
     <ClCompile Include="Memory\Memory.cpp" />
     <ClCompile Include="Offsets\Offsets.cpp" />
     <ClCompile Include="Overlay\Overlay.cpp" />
@@ -197,6 +198,9 @@ d3dcompiler.lib</AdditionalDependencies>
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="JSON\JSON.h" />
+    <ClInclude Include="Math\Vector2.h" />
+    <ClInclude Include="Math\Vector3.h" />
+    <ClInclude Include="Math\View.h" />
     <ClInclude Include="Memory\Memory.h" />
     <ClInclude Include="Offsets\Offsets.h" />
     <ClInclude Include="Overlay\Overlay.h" />

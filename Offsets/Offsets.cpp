@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include "../A2X Dumper/A2XDumper.h"
+#include "../Console/Console.h"
 
 using nlohmann::json;
 using namespace std;
@@ -85,11 +86,42 @@ static bool HandleJSONLoadingFromWeb()
 static void ExtractEngine2DLL()
 {
 	const auto& JSON = OFFSETS.at("engine2.dll");
+	const auto& ClientDLL = Memory::GetClientDLL();
 
-	Offsets::engine2_dll::dwBuildNumber = JSON.at("dwBuildNumber").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient = JSON.at("dwNetworkGameClient").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_isBackgroundMap = JSON.at("dwNetworkGameClient_isBackgroundMap").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_signOnState = JSON.at("dwNetworkGameClient_signOnState").get<uintptr_t>();
+	Offsets::engine2_dll::dwBuildNumber = ClientDLL + JSON.at("dwBuildNumber").get<ptrdiff_t>();
+	Offsets::engine2_dll::dwNetworkGameClient = ClientDLL + JSON.at("dwNetworkGameClient").get<ptrdiff_t>();
+	Offsets::engine2_dll::dwNetworkGameClient_isBackgroundMap = JSON.at("dwNetworkGameClient_isBackgroundMap").get<ptrdiff_t>();
+	Offsets::engine2_dll::dwNetworkGameClient_signOnState = JSON.at("dwNetworkGameClient_signOnState").get<ptrdiff_t>();
+}
+
+static void ExtractClientDLL()
+{
+	const auto& JSON = OFFSETS.at("client.dll");
+	const auto& ClientDLL = Memory::GetClientDLL();
+
+	Offsets::client_dll::dwEntityList = ClientDLL + JSON.at("dwEntityList").get<ptrdiff_t>();
+	Offsets::client_dll::dwViewMatrix = ClientDLL + JSON.at("dwViewMatrix").get<ptrdiff_t>();
+}
+
+static void ExtractCCSPlayerController()
+{
+	const auto& JSON = CLIENT_DLL.at("client.dll").at("classes").at("CCSPlayerController").at("fields");
+
+	Offsets::CCSPlayerController::m_hPlayerPawn = JSON.at("m_hPlayerPawn").get<ptrdiff_t>();
+}
+
+static void ExtractC_BaseEntity()
+{
+	const auto& JSON = CLIENT_DLL.at("client.dll").at("classes").at("C_BaseEntity").at("fields");
+
+	Offsets::C_BaseEntity::m_pGameSceneNode = JSON.at("m_pGameSceneNode").get<ptrdiff_t>();
+}
+
+static void ExtractCGameSceneNode()
+{
+	const auto& JSON = CLIENT_DLL.at("client.dll").at("classes").at("CGameSceneNode").at("fields");
+
+	Offsets::CGameSceneNode::m_vecOrigin = JSON.at("m_vecOrigin").get<ptrdiff_t>();
 }
 
 static void GetNewBuildnumber()
@@ -204,6 +236,10 @@ static bool LoadAllOffsets()
 	try
 	{
 		ExtractEngine2DLL();
+		ExtractClientDLL();
+		ExtractCCSPlayerController();
+		ExtractC_BaseEntity();
+		ExtractCGameSceneNode();
 	}
 	catch (const json::exception& e)
 	{

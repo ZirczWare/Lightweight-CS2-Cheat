@@ -15,6 +15,7 @@
 #include <string>
 #include "../Cheat/Cheat.h"
 #include "../Offsets/Offsets.h"
+#include "../Math/View.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -149,6 +150,9 @@ static void UpdateTargetSize()
         WindowSizeX = Rect.right;
         WindowSizeY = Rect.bottom;
 
+        View::ScreenCenter.x = WindowSizeX * 0.5f;
+        View::ScreenCenter.y = WindowSizeY * 0.5f;
+
         ResizeOverlay();
 }
 
@@ -232,6 +236,8 @@ static bool HandleInits()
                 Popup::Error(Offsets::GetError());
                 return false;
         }
+
+        View::Initialize();
 
         return true;
 }
