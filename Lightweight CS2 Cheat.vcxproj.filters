@@ -63,6 +63,12 @@
     <ClCompile Include="JSON\JSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="A2X Dumper\A2XDumper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cache\Cache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console\Console.h">
@@ -113,5 +119,14 @@
     <ClInclude Include="JSON\JSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="A2X Dumper\A2XDumper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cache\Cache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="A2X Dumper\cs2_dumper.lib" />
   </ItemGroup>
 </Project>

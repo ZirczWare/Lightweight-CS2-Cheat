@@ -6,16 +6,19 @@
 
 void Console::Show()
 {
-        // syncing streams lowers performance, we don't need it
+        // Syncing streams lowers performance, we don't need it
         std::ios::sync_with_stdio(false);
 
-        // no punishment if Show() is called multiple times
+        // No punishment if Show() is called multiple times
         FreeConsole();
 
         if (AllocConsole())
         {
-                // redirect output stream to console
+                // Redirect output stream to console
                 freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+
+                // Clear error bits if printed before Show()
+                std::cout.clear();
 
                 Console::Print("[ ! ] Console is now available\n");
         }

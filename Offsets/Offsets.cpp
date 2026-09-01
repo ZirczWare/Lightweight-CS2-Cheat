@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
+#include "../A2X Dumper/A2XDumper.h"
 
 using nlohmann::json;
 using namespace std;
@@ -48,11 +49,8 @@ static bool LoadJSON(json& JSON, const char* Filepath)
 	}
 }
 
-static bool HandleJSONLoading(json& JSON, const char* Address, const char* Filepath)
+static bool LoadJSONFromWeb(json& JSON, const char* Address, const char* Filepath)
 {
-	if (exists(Filepath))
-		return LoadJSON(JSON, Filepath);
-	
 	bool Success = HTTP::Download(Address, Filepath);
 	if (!Success)
 	{
@@ -63,16 +61,34 @@ static bool HandleJSONLoading(json& JSON, const char* Address, const char* Filep
 	return LoadJSON(JSON, Filepath);
 }
 
+static bool HandleJSONLoadingFromWeb()
+{
+	bool Success;
+
+	Success = LoadJSONFromWeb(CLIENT_DLL, CLIENT_DLL_ADDRESS, CLIENT_DLL_FILENAME);
+	if (!Success)
+	{
+		ErrorMessage = HTTP::GetError();
+		return false;
+	}
+
+	Success = LoadJSONFromWeb(OFFSETS, OFFSETS_ADDRESS, OFFSETS_FILENAME);
+	if (!Success)
+	{
+		ErrorMessage = HTTP::GetError();
+		return false;
+	}
+
+	return true;
+}
+
 static void ExtractEngine2DLL()
 {
 	const auto& JSON = OFFSETS.at("engine2.dll");
 
 	Offsets::engine2_dll::dwBuildNumber = JSON.at("dwBuildNumber").get<uintptr_t>();
 	Offsets::engine2_dll::dwNetworkGameClient = JSON.at("dwNetworkGameClient").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_clientTickCount = JSON.at("dwNetworkGameClient_clientTickCount").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_deltaTick = JSON.at("dwNetworkGameClient_deltaTick").get<uintptr_t>();
 	Offsets::engine2_dll::dwNetworkGameClient_isBackgroundMap = JSON.at("dwNetworkGameClient_isBackgroundMap").get<uintptr_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_serverTickCount = JSON.at("dwNetworkGameClient_serverTickCount").get<uintptr_t>();
 	Offsets::engine2_dll::dwNetworkGameClient_signOnState = JSON.at("dwNetworkGameClient_signOnState").get<uintptr_t>();
 }
 
@@ -202,8 +218,8 @@ static bool RemovePreviousJSONFiles()
 {
 	try
 	{
-		remove(CLIENT_DLL_FILENAME);
-		remove(OFFSETS_FILENAME);
+		filesystem::remove(CLIENT_DLL_FILENAME);
+		filesystem::remove(OFFSETS_FILENAME);
 	}
 	catch (const filesystem_error& e)
 	{
@@ -214,45 +230,88 @@ static bool RemovePreviousJSONFiles()
 	return true;
 }
 
-bool Offsets::Init()
+static bool LoadOffsetsAndUpdatBuildnumber()
 {
-	bool BuildnumberLoadingSuccess = HandleBuildnumberLoading();
-	if (!BuildnumberLoadingSuccess)
-		return false;
-
-	bool OffsetsGood, LoadedAllOffsets;
-
-	OffsetsGood = AreOffsetsGood();
-	if (OffsetsGood)
-	{
-		LoadedAllOffsets = LoadAllOffsets();
-		if (LoadedAllOffsets)
-			return true;
-	}
-
-	CLIENT_DLL = OFFSETS = nullptr;
-
-	bool RemovedPreviousOffsets = RemovePreviousJSONFiles();
-	if (!RemovedPreviousOffsets)
-		return false;
-
-	bool JSONLoadingSuccess;
-
-	JSONLoadingSuccess = HandleJSONLoading(CLIENT_DLL, CLIENT_DLL_ADDRESS, CLIENT_DLL_FILENAME);
-	if (!JSONLoadingSuccess)
-		return false;
-
-	JSONLoadingSuccess = HandleJSONLoading(OFFSETS, OFFSETS_ADDRESS, OFFSETS_FILENAME);
-	if (!JSONLoadingSuccess)
-		return false;
-
-	LoadedAllOffsets = LoadAllOffsets();
+	bool LoadedAllOffsets = LoadAllOffsets();
 	if (!LoadedAllOffsets)
 		return false;
 
 	bool OldBuildnumberUpdated = UpdateOldBuildnumber();
 	if (!OldBuildnumberUpdated)
 		return false;
+
+	return true;
+}
+
+static bool HandleJSONLoadingLocally()
+{
+	bool DumpSuccesful = A2XDumper::Dump();
+	if (!DumpSuccesful)
+	{
+		ErrorMessage = "Error dumping offsets locally";
+		return false;
+	}
+
+	bool JSONLoadSuccessful;
+
+	JSONLoadSuccessful = LoadJSON(CLIENT_DLL, CLIENT_DLL_FILENAME);
+	if (!JSONLoadSuccessful)
+		return false;
+
+	JSONLoadSuccessful = LoadJSON(OFFSETS, OFFSETS_FILENAME);
+	if (!JSONLoadSuccessful)
+		return false;
+
+	return true;
+}
+
+bool Offsets::Init()
+{
+	bool BuildnumberLoadingSuccess = HandleBuildnumberLoading();
+	if (!BuildnumberLoadingSuccess)
+		return false;
+
+	bool OffsetsGood;
+
+	OffsetsGood = AreOffsetsGood();
+	if (OffsetsGood)
+	{
+		bool LoadedAllOffsets = LoadAllOffsets();
+		if (LoadedAllOffsets)
+			return true;
+	}
+
+	CLIENT_DLL = OFFSETS = nullptr;
+
+	bool RemovedPreviousOffsets;
+
+	RemovedPreviousOffsets = RemovePreviousJSONFiles();
+	if (!RemovedPreviousOffsets)
+		return false;
+
+	bool JSONLocalLoadingSuccess, LoadedOffsetsAndUpdatedBuildnumber;
+
+	JSONLocalLoadingSuccess = HandleJSONLoadingLocally();
+	if (JSONLocalLoadingSuccess)
+	{
+		LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
+		if (LoadedOffsetsAndUpdatedBuildnumber)
+			return true;
+	}
+
+	RemovedPreviousOffsets = RemovePreviousJSONFiles();
+	if (!RemovedPreviousOffsets)
+		return false;
+
+	bool JSONWebLoadingSuccess = HandleJSONLoadingFromWeb();
+	if (!JSONWebLoadingSuccess)
+		return false;
+
+	LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
+	if (!LoadedOffsetsAndUpdatedBuildnumber)
+		return false;
+
+	CLIENT_DLL = OFFSETS = nullptr;
 
 	return true;
 }

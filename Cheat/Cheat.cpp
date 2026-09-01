@@ -5,7 +5,7 @@
 
 void Cheat::Run()
 {
-        std::int64_t Buildnumber{};
-        Memory::Read(Memory::GetEngine2DLL() + Offsets::engine2_dll::dwBuildNumber, Buildnumber);
-        Console::Print("Buildnumber: {}\n", Buildnumber);
+        std::int64_t dwBuildNumber{};
+        Memory::Read(Memory::GetEngine2DLL() + Offsets::engine2_dll::dwBuildNumber, dwBuildNumber);
+        Console::Print("dwBuildNumber: {}\n", dwBuildNumber);
 }

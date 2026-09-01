@@ -132,8 +132,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
-d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
+d3dcompiler.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\sohil\OneDrive\Dokumentumok\GitHub\Lightweight CS2 Cheat\A2X Dumper;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -153,14 +154,17 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
-d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
+d3dcompiler.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\sohil\OneDrive\Dokumentumok\GitHub\Lightweight CS2 Cheat\A2X Dumper;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="A2X Dumper\A2XDumper.cpp" />
+    <ClCompile Include="Cache\Cache.cpp" />
     <ClCompile Include="Cheat\Cheat.cpp" />
     <ClCompile Include="Console\Console.cpp" />
     <ClCompile Include="HTTP\HTTP.cpp" />
@@ -179,6 +183,8 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Popup\Popup.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="A2X Dumper\A2XDumper.h" />
+    <ClInclude Include="Cache\Cache.h" />
     <ClInclude Include="Cheat\Cheat.h" />
     <ClInclude Include="Console\Console.h" />
     <ClInclude Include="HTTP\HTTP.h" />
@@ -195,6 +201,9 @@ d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Offsets\Offsets.h" />
     <ClInclude Include="Overlay\Overlay.h" />
     <ClInclude Include="Popup\Popup.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="A2X Dumper\cs2_dumper.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
