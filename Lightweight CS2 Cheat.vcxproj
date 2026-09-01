@@ -198,7 +198,6 @@ d3dcompiler.lib</AdditionalDependencies>
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="JSON\JSON.h" />
-    <ClInclude Include="Math\Vector2.h" />
     <ClInclude Include="Math\Vector3.h" />
     <ClInclude Include="Math\View.h" />
     <ClInclude Include="Memory\Memory.h" />

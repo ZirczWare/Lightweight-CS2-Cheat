@@ -2,7 +2,6 @@
 #include <smmintrin.h>
 #include <immintrin.h>
 #include <intrin.h>
-#include "Vector2.h"
 #include "Vector3.h"
 #include "../ImGui/imgui.h"
 #include "../Offsets/Offsets.h"
@@ -29,8 +28,6 @@ void View::Initialize()
         bool fmaSupported = (cpuInfo[2] & (1 << 12)) != 0;
 
         g_HasAVX2 = avx2Supported && fmaSupported;
-
-        Console::Print("AVX support: {}\n", g_HasAVX2);
 }
 
 void View::Update()

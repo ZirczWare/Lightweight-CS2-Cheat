@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Vector3.h"
-#include "Vector2.h"
 #include <immintrin.h>
 #include "../ImGui/imgui.h"
 
 namespace View
 {
 	inline float Matrix[4][4];
-	inline Vector2 ScreenCenter;
+	inline ImVec2 ScreenCenter;
 
 	void Initialize();
 	void Update();
