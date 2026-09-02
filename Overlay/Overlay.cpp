@@ -22,6 +22,10 @@
 #include "../Console/Console.h"
 #include "../TimerResolution/TimerResolution.h"
 #include "../Memory/Memory.h"
+#include <random>
+#include <cstdint>
+#include <sal.h>
+#include <string_view>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -47,6 +51,37 @@ static LPCSTR TargetClass = "";
 static LPCSTR TargetName = "";
 
 static bool TargetInForeground = false;
+
+static WNDCLASSEXW wc{};
+
+static std::wstring GenerateRandomString()
+{
+        static constexpr std::string_view Charset =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+
+        uint64_t State = []() {
+                std::random_device RandomDevice;
+                uint64_t Seed = (static_cast<uint64_t>(RandomDevice()) << 32) | RandomDevice();
+                return Seed ? Seed : 0x8ce7e7ec64121e45ULL;
+        }();
+
+        auto NextRandom = [&State]() -> uint64_t {
+                State ^= State >> 12;
+                State ^= State << 25;
+                State ^= State >> 27;
+                return State * 0xFD9113CCA137151DULL;
+        };
+
+        size_t TargetLength = 8 + static_cast<size_t>((NextRandom() & 0xFF) % 17);
+
+        std::wstring ResultString;
+        ResultString.resize(TargetLength);
+
+        for (size_t Index = 0; Index < TargetLength; ++Index)
+                ResultString[Index] = Charset[NextRandom() & 63];
+
+        return ResultString;
+}
 
 static void CreateRenderTarget()
 {
@@ -232,6 +267,23 @@ static bool UpdateTargetPeriodically()
         return true;
 }
 
+static bool HandleStartup()
+{
+        if (!Memory::Attach())
+        {
+                Popup::Error("Couldn't attach memory reader to target");
+                return false;
+        }
+
+        if (!TimerResolution::Set())
+        {
+                Popup::Error("Couldn't set timer resolution");
+                return false;
+        }
+
+        return true;
+}
+
 static bool HandleInits()
 {
         bool Success;
@@ -248,38 +300,18 @@ static bool HandleInits()
         return true;
 }
 
-void Overlay::Run()
+static bool HandleWindowCreation()
 {
-        if (!Memory::Attach())
-        {
-                Popup::Error("Couldn't attach memory reader to target");
-                return;
-        }
-
-        if (!TimerResolution::Set())
-        {
-                Popup::Error("Couldn't set timer resolution");
-                return;
-        }
-
-        if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
-        {
-                Popup::Error("Couldn't attach overlay to target");
-                return;
-        }
-
-        ImGui_ImplWin32_EnableDpiAwareness();
-
-        WNDCLASSEXW wc = {
-                sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L,
+        wc = {
+                sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L,
                 GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
-                L"Overlay Class", nullptr
+                GenerateRandomString().c_str(), nullptr
         };
         ::RegisterClassExW(&wc);
 
         OverlayWindow = ::CreateWindowEx(
                 WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
-                wc.lpszClassName, L"Dear ImGui DirectX11 Overlay", WS_POPUP,
+                wc.lpszClassName, GenerateRandomString().c_str(), WS_POPUP,
                 WindowPosX, WindowPosY, WindowSizeX, WindowSizeY,
                 nullptr, nullptr, wc.hInstance, nullptr
         );
@@ -287,12 +319,20 @@ void Overlay::Run()
         if (OverlayWindow == NULL)
         {
                 Popup::Error("Window couldn't be created");
-                return;
+                return false;
         }
+
+        return true;
+}
+
+static bool HandleWindowAndDeviceCreation()
+{
+        bool WindowInBandCreated = HandleWindowCreation();
+        if (!WindowInBandCreated)
+                return false;
 
         LONG_PTR exStyle = GetWindowLongPtr(OverlayWindow, GWL_EXSTYLE);
         ::SetWindowLongPtr(OverlayWindow, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
-
         ::SetLayeredWindowAttributes(OverlayWindow, RGB(0, 0, 0), 255, LWA_ALPHA);
 
         MARGINS margins = { -1 };
@@ -303,7 +343,7 @@ void Overlay::Run()
                 CleanupDeviceD3D();
                 ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
                 Popup::Error("Device couldn't be created");
-                return;
+                return false;
         }
 
         ::ShowWindow(OverlayWindow, SW_SHOWDEFAULT);
@@ -313,6 +353,27 @@ void Overlay::Run()
 
         ImGui_ImplWin32_Init(OverlayWindow);
         ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+
+        return true;
+}
+
+void Overlay::Run()
+{
+        bool SuccessfulStartup = HandleStartup();
+        if (!SuccessfulStartup)
+                return;
+
+        if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
+        {
+                Popup::Error("Couldn't attach overlay to target");
+                return;
+        }
+
+        ImGui_ImplWin32_EnableDpiAwareness();
+
+        bool WindowAndDeviceCreated = HandleWindowAndDeviceCreation();
+        if (!WindowAndDeviceCreated)
+                return;
 
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 
