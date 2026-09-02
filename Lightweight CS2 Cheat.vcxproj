@@ -132,7 +132,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
+      <AdditionalDependencies>winmm.lib;cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
 d3dcompiler.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\sohil\OneDrive\Dokumentumok\GitHub\Lightweight CS2 Cheat\A2X Dumper;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -154,7 +154,7 @@ d3dcompiler.lib</AdditionalDependencies>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
+      <AdditionalDependencies>winmm.lib;cs2_dumper.lib;ntdll.lib;ws2_32.lib;userenv.lib;advapi32.lib;bcrypt.lib;iphlpapi.lib;Iphlpapi.lib;Secur32.lib;Ws2_32.lib;Crypt32.lib;Wldap32.lib;Normaliz.lib;libcurl.lib;d3d11.lib;
 d3dcompiler.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\sohil\OneDrive\Dokumentumok\GitHub\Lightweight CS2 Cheat\A2X Dumper;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -182,12 +182,14 @@ d3dcompiler.lib</AdditionalDependencies>
     <ClCompile Include="Offsets\Offsets.cpp" />
     <ClCompile Include="Overlay\Overlay.cpp" />
     <ClCompile Include="Popup\Popup.cpp" />
+    <ClCompile Include="TimerResolution\TimerResolution.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="A2X Dumper\A2XDumper.h" />
     <ClInclude Include="Cache\Cache.h" />
     <ClInclude Include="Cheat\Cheat.h" />
     <ClInclude Include="Console\Console.h" />
+    <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="HTTP\HTTP.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
@@ -204,6 +206,8 @@ d3dcompiler.lib</AdditionalDependencies>
     <ClInclude Include="Offsets\Offsets.h" />
     <ClInclude Include="Overlay\Overlay.h" />
     <ClInclude Include="Popup\Popup.h" />
+    <ClInclude Include="Render\Render.h" />
+    <ClInclude Include="TimerResolution\TimerResolution.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="A2X Dumper\cs2_dumper.lib" />

@@ -16,6 +16,12 @@
 #include "../Cheat/Cheat.h"
 #include "../Offsets/Offsets.h"
 #include "../Math/View.h"
+#include "../Cache/Cache.h"
+#include <chrono>
+#include <thread>
+#include "../Console/Console.h"
+#include "../TimerResolution/TimerResolution.h"
+#include "../Memory/Memory.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -237,27 +243,39 @@ static bool HandleInits()
                 return false;
         }
 
-        View::Initialize();
+        Cache::Init();
 
         return true;
 }
 
 void Overlay::Run()
 {
-        ImGui_ImplWin32_EnableDpiAwareness();
+        if (!Memory::Attach())
+        {
+                Popup::Error("Couldn't attach memory reader to target");
+                return;
+        }
 
-        WNDCLASSEXW wc = { 
-                sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, 
-                GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, 
-                L"Overlay Class", nullptr 
-        };
-        ::RegisterClassExW(&wc);
+        if (!TimerResolution::Set())
+        {
+                Popup::Error("Couldn't set timer resolution");
+                return;
+        }
 
         if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
         {
                 Popup::Error("Couldn't attach overlay to target");
                 return;
         }
+
+        ImGui_ImplWin32_EnableDpiAwareness();
+
+        WNDCLASSEXW wc = {
+                sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L,
+                GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
+                L"Overlay Class", nullptr
+        };
+        ::RegisterClassExW(&wc);
 
         OverlayWindow = ::CreateWindowEx(
                 WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
@@ -293,8 +311,6 @@ void Overlay::Run()
 
         ImGui::CreateContext();
 
-        ImGui::StyleColorsDark();
-
         ImGui_ImplWin32_Init(OverlayWindow);
         ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
@@ -304,9 +320,16 @@ void Overlay::Run()
         if (!SuccessfullyInited)
                 return;
 
+        Beep(750, 1000);
+
         while (true)
         {
+                std::this_thread::sleep_for(std::chrono::milliseconds(15));
+
                 if (PeekMessageQuit())
+                        break;
+
+                if (GetAsyncKeyState(VK_PAUSE) & 0x8000)
                         break;
 
                 if (not UpdateTargetPeriodically())
@@ -331,8 +354,10 @@ void Overlay::Run()
 
                 ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-                g_pSwapChain->Present(1, 0);
+                g_pSwapChain->Present(0, 0);
         }
+
+        Cache::Shutdown();
 
         ImGui_ImplDX11_Shutdown();
         ImGui_ImplWin32_Shutdown();
@@ -341,6 +366,10 @@ void Overlay::Run()
         CleanupDeviceD3D();
         ::DestroyWindow(OverlayWindow);
         ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+
+        TimerResolution::Reset();
+
+        Beep(750, 1000);
 
         return;
 }

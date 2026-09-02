@@ -89,9 +89,6 @@ static void ExtractEngine2DLL()
 	const auto& ClientDLL = Memory::GetClientDLL();
 
 	Offsets::engine2_dll::dwBuildNumber = ClientDLL + JSON.at("dwBuildNumber").get<ptrdiff_t>();
-	Offsets::engine2_dll::dwNetworkGameClient = ClientDLL + JSON.at("dwNetworkGameClient").get<ptrdiff_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_isBackgroundMap = JSON.at("dwNetworkGameClient_isBackgroundMap").get<ptrdiff_t>();
-	Offsets::engine2_dll::dwNetworkGameClient_signOnState = JSON.at("dwNetworkGameClient_signOnState").get<ptrdiff_t>();
 }
 
 static void ExtractClientDLL()
@@ -101,6 +98,7 @@ static void ExtractClientDLL()
 
 	Offsets::client_dll::dwEntityList = ClientDLL + JSON.at("dwEntityList").get<ptrdiff_t>();
 	Offsets::client_dll::dwViewMatrix = ClientDLL + JSON.at("dwViewMatrix").get<ptrdiff_t>();
+	Offsets::client_dll::dwLocalPlayerPawn = ClientDLL + JSON.at("dwLocalPlayerPawn").get<ptrdiff_t>();
 }
 
 static void ExtractCCSPlayerController()
@@ -108,6 +106,7 @@ static void ExtractCCSPlayerController()
 	const auto& JSON = CLIENT_DLL.at("client.dll").at("classes").at("CCSPlayerController").at("fields");
 
 	Offsets::CCSPlayerController::m_hPlayerPawn = JSON.at("m_hPlayerPawn").get<ptrdiff_t>();
+	Offsets::CCSPlayerController::m_bPawnIsAlive = JSON.at("m_bPawnIsAlive").get<ptrdiff_t>();
 }
 
 static void ExtractC_BaseEntity()
@@ -115,6 +114,7 @@ static void ExtractC_BaseEntity()
 	const auto& JSON = CLIENT_DLL.at("client.dll").at("classes").at("C_BaseEntity").at("fields");
 
 	Offsets::C_BaseEntity::m_pGameSceneNode = JSON.at("m_pGameSceneNode").get<ptrdiff_t>();
+	Offsets::C_BaseEntity::m_iTeamNum = JSON.at("m_iTeamNum").get<ptrdiff_t>();
 }
 
 static void ExtractCGameSceneNode()
