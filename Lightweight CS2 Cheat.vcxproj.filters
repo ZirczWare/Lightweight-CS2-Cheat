@@ -150,4 +150,9 @@
   <ItemGroup>
     <Library Include="A2X Dumper\cs2_dumper.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

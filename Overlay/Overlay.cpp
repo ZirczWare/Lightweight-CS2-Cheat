@@ -164,15 +164,17 @@ static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 static void ResizeOverlay()
 {
-        if (g_pd3dDeviceContext != nullptr)
-        {
-                CleanupRenderTarget();
-                g_pd3dDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-                g_pSwapChain->ResizeBuffers(0, WindowSizeX, WindowSizeY, DXGI_FORMAT_UNKNOWN, 0);
-                CreateRenderTarget();
-        }
+        if (g_pd3dDeviceContext == nullptr)
+                return;
+
+        CleanupRenderTarget();
+        g_pd3dDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+        g_pSwapChain->ResizeBuffers(0, WindowSizeX, WindowSizeY, DXGI_FORMAT_UNKNOWN, 0);
+        CreateRenderTarget();
 
         ::SetWindowPos(OverlayWindow, HWND_TOPMOST, WindowPosX, WindowPosY, WindowSizeX, WindowSizeY, SWP_SHOWWINDOW | SWP_NOACTIVATE);
+
+        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 }
 
 static void UpdateTargetSize()
@@ -350,6 +352,9 @@ static bool HandleWindowAndDeviceCreation()
         ::UpdateWindow(OverlayWindow);
 
         ImGui::CreateContext();
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = nullptr;
 
         ImGui_ImplWin32_Init(OverlayWindow);
         ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
