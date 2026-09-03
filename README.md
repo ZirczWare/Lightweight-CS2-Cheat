@@ -2,7 +2,7 @@
 
 Simple box ESP for Counter-Strike 2, with automatically updating offsets. 
 
-Uses ~0% CPU, ~0.5% GPU and ~10Mb of RAM.
+Uses `~0% CPU`, `~0.5% GPU` and `~10Mb RAM`.
 
 ## Usage
 
@@ -12,7 +12,7 @@ Uses ~0% CPU, ~0.5% GPU and ~10Mb of RAM.
 
 Press `pause / break` key to exit.
 
-A beep noise will go off upon startup and on exit.
+A `beep` noise will go off upon startup and on exit.
 
 ## Showcase
 
