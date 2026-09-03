@@ -14,21 +14,22 @@
 #include "../Entity/Entity.h"
 
 constexpr int MAX_ENTITIES = 64;
+constexpr int MAX_ENEMIES = MAX_ENTITIES / 2;
 
 static std::atomic<bool> ThreadsShouldRun{ false };
 static std::thread FrequentUpdateThread;
 static std::thread SlowUpdateThread;
 
-static Entity::Data Entities[MAX_ENTITIES];
-static size_t EntitiesCount = 0;
+static Entity::Data Enemies[MAX_ENEMIES];
+static size_t EnemiesCount = 0;
 
 static void FrequentUpdate()
 {
-	Vector3 Origins[MAX_ENTITIES];
-	Vector3 Heads[MAX_ENTITIES];
+	Vector3 Origins[MAX_ENEMIES];
+	Vector3 Heads[MAX_ENEMIES];
 
-	ImVec2 ScreenOrigins[MAX_ENTITIES];
-	ImVec2 ScreenHeads[MAX_ENTITIES];
+	ImVec2 ScreenOrigins[MAX_ENEMIES];
+	ImVec2 ScreenHeads[MAX_ENEMIES];
 
 	Render::Data LocalRenderData;
 
@@ -38,9 +39,9 @@ static void FrequentUpdate()
 
 		View::Update();
 
-		for (int i = 0; i < EntitiesCount; i++)
+		for (int i = 0; i < EnemiesCount; i++)
 		{
-			Memory::Read(Entities[i].AbsOriginAddress, Origins[i]);
+			Memory::Read(Enemies[i].AbsOriginAddress, Origins[i]);
 
 			LocalRenderData.VisibleOnScreen[i] = View::WorldToScreen(Origins[i], ScreenOrigins[i]);
 			if (!LocalRenderData.VisibleOnScreen[i])
@@ -60,7 +61,7 @@ static void FrequentUpdate()
 			};
 		}
 
-		LocalRenderData.Count = EntitiesCount;
+		LocalRenderData.Count = EnemiesCount;
 			
 		{
 			std::lock_guard<std::mutex> lock(Cache::Mutex);
@@ -72,23 +73,27 @@ static void FrequentUpdate()
 static void SlowUpdate()
 {
 	std::uint8_t ClientTeam = 0;
-	Entity::Data LocalEntities[MAX_ENTITIES];
+	Entity::Data LocalEnemies[MAX_ENEMIES];
 
 	while (ThreadsShouldRun.load(std::memory_order_relaxed))
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		uintptr_t ClientPawn{};
+		Memory::Read(Offsets::client_dll::dwLocalPlayerPawn, ClientPawn);
+		if (!ClientPawn)
+		{
+			std::lock_guard<std::mutex> lock(Cache::Mutex);
+			EnemiesCount = 0;
+			continue;
+		}
 
 		uintptr_t EntityList{};
 		Memory::Read(Offsets::client_dll::dwEntityList, EntityList);
 		if (!EntityList)
 			continue;
 
-		uintptr_t ClientPawn{};
-		Memory::Read(Offsets::client_dll::dwLocalPlayerPawn, ClientPawn);
-		if (!ClientPawn)
-			continue;
-
-		size_t LocalEntitiesCount = 0;
+		size_t LocalEnemiesCount = 0;
 
 		for (int i = 1; i < MAX_ENTITIES; i++) // First index is skippable
 		{
@@ -139,18 +144,16 @@ static void SlowUpdate()
 			if (!GameSceneNode)
 				break;
 
-			LocalEntities[LocalEntitiesCount].AbsOriginAddress = GameSceneNode + Offsets::CGameSceneNode::m_vecOrigin;
-			LocalEntitiesCount++;
+			LocalEnemies[LocalEnemiesCount].AbsOriginAddress = GameSceneNode + Offsets::CGameSceneNode::m_vecOrigin;
+			LocalEnemiesCount++;
 		}
 
-		{
-			std::lock_guard<std::mutex> lock(Cache::Mutex);
+		std::lock_guard<std::mutex> lock(Cache::Mutex);
 
-			for (size_t i = 0; i < LocalEntitiesCount; i++)
-				Entities[i] = LocalEntities[i];
+		for (size_t i = 0; i < LocalEnemiesCount; i++)
+			Enemies[i] = LocalEnemies[i];
 
-			EntitiesCount = LocalEntitiesCount;
-		}
+		EnemiesCount = LocalEnemiesCount;
 	}
 }
 
