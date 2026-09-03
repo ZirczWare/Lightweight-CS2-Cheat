@@ -38,16 +38,15 @@ static bool LoadJSON(json& JSON, const char* Filepath)
 
 	case CANNOT_OPEN:
 		ErrorMessage = "Couldn't open JSON file: " + string(Filepath);
-		return false;
 
 	case PARSE_ERROR:
 		ErrorMessage = "Error parsing JSON file: " + string(Filepath);
-		return false;
 
 	default:
 		ErrorMessage = "Unknown JSON error on file: " + string(Filepath);
-		return false;
 	}
+
+	return false;
 }
 
 static bool LoadJSONFromWeb(json& JSON, const char* Address, const char* Filepath)
