@@ -332,7 +332,10 @@ bool Offsets::Init()
 	{
 		LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
 		if (LoadedOffsetsAndUpdatedBuildnumber)
+		{
+			CLIENT_DLL = OFFSETS = nullptr;
 			return true;
+		}
 	}
 
 	RemovedPreviousOffsets = RemovePreviousJSONFiles();
