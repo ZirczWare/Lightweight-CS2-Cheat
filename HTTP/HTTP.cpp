@@ -1,6 +1,5 @@
 #include "HTTP.h"
 #include <curl/curl.h>
-#include "../Popup/Popup.h"
 
 static std::string ErrorMessage = "";
 

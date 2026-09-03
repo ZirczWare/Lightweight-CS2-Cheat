@@ -1,18 +1,8 @@
 #include "Cheat.h"
-#include "../Console/Console.h"
-#include "../Memory/Memory.h"
-#include "../Offsets/Offsets.h"
-#include "../Math/Vector3.h"
-#include <vector>
-#include "../Math/View.h"
 #include "../ImGui/imgui.h"
 #include <mutex>
 #include "../Render/Render.h"
 #include "../Cache/Cache.h"
-
-static Vector3 WorldPositions[64];
-static ImVec2 ScreenPositions[64];
-static bool PositionsVisibility[64];
 
 void Cheat::Run()
 {

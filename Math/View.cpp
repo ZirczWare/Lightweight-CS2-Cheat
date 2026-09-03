@@ -1,7 +1,4 @@
 #include "View.h"
-#include <smmintrin.h>
-#include <immintrin.h>
-#include <intrin.h>
 #include "Vector3.h"
 #include "../ImGui/imgui.h"
 #include "../Offsets/Offsets.h"
