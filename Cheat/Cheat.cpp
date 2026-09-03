@@ -21,14 +21,10 @@ void Cheat::Run()
 
 		drawList->AddRect({ RenderData.Boxes[i].x, RenderData.Boxes[i].y },
 			{ RenderData.Boxes[i].z, RenderData.Boxes[i].w },
-			ImColor(0, 0, 0, 255), 0, ImDrawFlags_None, 1.f);
+			ImColor(0, 0, 0, 255), 0, ImDrawFlags_None, 3.f);
 
-		drawList->AddRect({ RenderData.Boxes[i].x - 1.f, RenderData.Boxes[i].y - 1.f },
-			{ RenderData.Boxes[i].z + 1.f, RenderData.Boxes[i].w + 1.f },
+		drawList->AddRect({ RenderData.Boxes[i].x, RenderData.Boxes[i].y },
+			{ RenderData.Boxes[i].z, RenderData.Boxes[i].w },
 			ImColor(255, 255, 255, 255), 0, ImDrawFlags_None, 1.f);
-
-		drawList->AddRect({ RenderData.Boxes[i].x - 2.f, RenderData.Boxes[i].y - 2.f },
-			{ RenderData.Boxes[i].z + 2.f, RenderData.Boxes[i].w + 2.f },
-			ImColor(0, 0, 0, 255), 0, ImDrawFlags_None, 1.f);
 	}
 }
