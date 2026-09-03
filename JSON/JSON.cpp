@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-JSONRESULT JSON::LoadJSONFromDisk(nlohmann::json& j, const char* Filepath)
+JSONRESULT JSON::LoadFromDisk(nlohmann::json& j, const char* Filepath)
 {
 	using json = nlohmann::json;
 

@@ -6,5 +6,5 @@ enum JSONRESULT { SUCCESS, CANNOT_OPEN, PARSE_ERROR };
 
 namespace JSON
 {
-	JSONRESULT LoadJSONFromDisk(nlohmann::json& j, const char* Filepath);
+	JSONRESULT LoadFromDisk(nlohmann::json& j, const char* Filepath);
 }

@@ -29,7 +29,7 @@ static string ErrorMessage = "";
 
 static bool LoadJSON(json& JSON, const char* Filepath)
 {
-	JSONRESULT Result = JSON::LoadJSONFromDisk(JSON, Filepath);
+	JSONRESULT Result = JSON::LoadFromDisk(JSON, Filepath);
 
 	switch (Result)
 	{
