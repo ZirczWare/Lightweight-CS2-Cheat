@@ -316,8 +316,6 @@ bool Offsets::Init()
 			return true;
 	}
 
-	CLIENT_DLL = OFFSETS = nullptr;
-
 	bool RemovedPreviousOffsets;
 
 	RemovedPreviousOffsets = RemovePreviousJSONFiles();
