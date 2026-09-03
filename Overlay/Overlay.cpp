@@ -436,6 +436,4 @@ void Overlay::Run()
         TimerResolution::Reset();
 
         Beep(750, 1000);
-
-        return;
 }
