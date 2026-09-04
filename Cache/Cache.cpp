@@ -13,23 +13,20 @@
 #include "../Math/Vector3.h"
 #include "../Entity/Entity.h"
 
-constexpr int MAX_ENTITIES = 64;
-constexpr int MAX_ENEMIES = MAX_ENTITIES / 2;
-
 static std::atomic<bool> ThreadsShouldRun{ false };
 static std::thread FrequentUpdateThread;
 static std::thread SlowUpdateThread;
 
-static Entity::Data Enemies[MAX_ENEMIES];
+static Entity::Data Enemies[Entity::MAX_ENEMIES];
 static size_t EnemiesCount = 0;
 
 static void FrequentUpdate()
 {
-	Vector3 Origins[MAX_ENEMIES];
-	Vector3 Heads[MAX_ENEMIES];
+	Vector3 Origins[Entity::MAX_ENEMIES];
+	Vector3 Heads[Entity::MAX_ENEMIES];
 
-	ImVec2 ScreenOrigins[MAX_ENEMIES];
-	ImVec2 ScreenHeads[MAX_ENEMIES];
+	ImVec2 ScreenOrigins[Entity::MAX_ENEMIES];
+	ImVec2 ScreenHeads[Entity::MAX_ENEMIES];
 
 	Render::Data LocalRenderData;
 
@@ -73,7 +70,7 @@ static void FrequentUpdate()
 static void SlowUpdate()
 {
 	std::uint8_t ClientTeam = 0;
-	Entity::Data LocalEnemies[MAX_ENEMIES];
+	Entity::Data LocalEnemies[Entity::MAX_ENEMIES];
 
 	while (ThreadsShouldRun.load(std::memory_order_relaxed))
 	{
@@ -95,7 +92,7 @@ static void SlowUpdate()
 
 		size_t LocalEnemiesCount = 0;
 
-		for (int i = 1; i < MAX_ENTITIES; i++) // First index is skippable
+		for (int i = 1; i < Entity::MAX_ENTITIES; i++) // First index is skippable
 		{
 			uintptr_t ListEntry{};
 			Memory::Read(EntityList + (static_cast<unsigned long long>(8) * (i & 0x7FFF) >> 9) + 16, ListEntry);

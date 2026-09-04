@@ -30,5 +30,7 @@ bool TimerResolution::Reset()
         if (status != TIMERR_NOERROR)
                 return false;
 
+        AlreadySet = false;
+
         return true;
 }
