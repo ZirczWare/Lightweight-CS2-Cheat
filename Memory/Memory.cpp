@@ -2,30 +2,49 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <cstdarg>
+#include <cstdint>
+#include <wchar.h>
 
-static DWORD_PTR GetModuleBaseAddress(DWORD dwPid, const wchar_t* moduleName)
+struct DLL
+{
+        std::uint64_t* Address;
+        const wchar_t* Name;
+};
+
+static bool GetModuleAddresses(DWORD dwPid, std::vector<DLL>& Modules)
 {
         HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, dwPid);
         if (hSnapshot == INVALID_HANDLE_VALUE)
-                return 0;
+                return false;
 
         MODULEENTRY32W moduleEntry{ sizeof(MODULEENTRY32W) };
         if (not Module32FirstW(hSnapshot, &moduleEntry))
-                return 0;
+                return false;
 
-        DWORD_PTR baseAddr = 0;
+        size_t FoundModules = 0;
+        size_t TotalModules = Modules.size();
 
         do
         {
-                if (_wcsicmp(moduleEntry.szModule, moduleName) != 0)
-                        continue;
+                auto it = std::find_if(Modules.begin(), Modules.end(), [&](const DLL& dll) {
+                        return _wcsicmp(dll.Name, moduleEntry.szModule) == 0;
+                });
+                if (it != Modules.end())
+                {
+                        *it->Address = reinterpret_cast<std::uint64_t>(moduleEntry.modBaseAddr);
 
-                baseAddr = reinterpret_cast<DWORD_PTR>(moduleEntry.modBaseAddr);
-                break;
+                        if (++FoundModules == TotalModules)
+                                break;
+                }
+
         } while (Module32NextW(hSnapshot, &moduleEntry));
 
         CloseHandle(hSnapshot);
-        return baseAddr;
+
+        return FoundModules == TotalModules;
 }
 
 static std::uint32_t GetProcessID(const std::wstring& processName)
@@ -66,10 +85,12 @@ bool Memory::Attach()
         if (Detail::hProcess == NULL)
                 return false;
 
-	Detail::ClientDLL = GetModuleBaseAddress(ProcessID, L"client.dll");
-        Detail::Engine2DLL = GetModuleBaseAddress(ProcessID, L"engine2.dll");
+        std::vector<DLL> Modules;
+        Modules.reserve(2);
+        Modules.emplace_back(DLL{ &Detail::ClientDLL, L"client.dll" });
+        Modules.emplace_back(DLL{ &Detail::Engine2DLL, L"engine2.dll" });
 
-	return (Detail::ClientDLL != 0 && Detail::Engine2DLL != 0);
+	return GetModuleAddresses(ProcessID, Modules);
 }
 
 void Memory::Detail::InternalRead(std::uintptr_t from, void* to, std::size_t size)

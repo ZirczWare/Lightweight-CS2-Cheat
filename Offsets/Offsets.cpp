@@ -275,6 +275,8 @@ static bool LoadOffsetsAndUpdatBuildnumber()
 	if (!OldBuildnumberUpdated)
 		return false;
 
+	CLIENT_DLL = OFFSETS = nullptr;
+
 	return true;
 }
 
@@ -313,7 +315,10 @@ bool Offsets::Init()
 	{
 		bool LoadedAllOffsets = LoadAllOffsets();
 		if (LoadedAllOffsets)
+		{
+			CLIENT_DLL = OFFSETS = nullptr;
 			return true;
+		}
 	}
 
 	bool RemovedPreviousOffsets;
@@ -329,10 +334,7 @@ bool Offsets::Init()
 	{
 		LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
 		if (LoadedOffsetsAndUpdatedBuildnumber)
-		{
-			CLIENT_DLL = OFFSETS = nullptr;
 			return true;
-		}
 	}
 
 	RemovedPreviousOffsets = RemovePreviousJSONFiles();
@@ -346,8 +348,6 @@ bool Offsets::Init()
 	LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
 	if (!LoadedOffsetsAndUpdatedBuildnumber)
 		return false;
-
-	CLIENT_DLL = OFFSETS = nullptr;
 
 	return true;
 }
