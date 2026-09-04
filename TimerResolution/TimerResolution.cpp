@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-UINT TargetResolution = 0;
+static UINT TargetResolution = 0;
 static bool AlreadySet = false;
 
 bool TimerResolution::Set()
