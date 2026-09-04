@@ -7,6 +7,9 @@ static bool AlreadySet = false;
 
 bool TimerResolution::Set()
 {
+        if (AlreadySet)
+                return true;
+
         TIMECAPS tc;
         if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != MMSYSERR_NOERROR)
                 return false;
