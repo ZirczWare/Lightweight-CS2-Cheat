@@ -313,7 +313,7 @@ static bool HandleWindowCreation()
         };
 
         if (!::RegisterClassExW(&WC)) {
-                Popup::Error("Window class coudln't be registered, code: " + GetLastError());
+                Popup::Error("Window class coudln't be registered, code: " + std::to_string(GetLastError()));
                 return false;
         }
 
@@ -328,7 +328,7 @@ static bool HandleWindowCreation()
 
         if (OverlayWindow == NULL)
         {
-                Popup::Error("Window couldn't be created, code: " + GetLastError());
+                Popup::Error("Window couldn't be created, code: " + std::to_string(GetLastError()));
                 return false;
         }
 
