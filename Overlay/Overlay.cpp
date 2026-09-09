@@ -52,7 +52,7 @@ static LPCSTR TargetName = "";
 
 static bool TargetInForeground = false;
 
-static WNDCLASSEXW wc{};
+static WNDCLASSEXW WC{};
 
 static std::wstring GenerateRandomString()
 {
@@ -304,23 +304,31 @@ static bool HandleInits()
 
 static bool HandleWindowCreation()
 {
-        wc = {
+        std::wstring ClassName = GenerateRandomString();
+
+        WC = {
                 sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L,
                 GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
-                GenerateRandomString().c_str(), nullptr
+                ClassName.c_str(), nullptr
         };
-        ::RegisterClassExW(&wc);
 
-        OverlayWindow = ::CreateWindowEx(
+        if (!::RegisterClassExW(&WC)) {
+                Popup::Error("Window class coudln't be registered, code: " + GetLastError());
+                return false;
+        }
+
+        std::wstring WindowName = GenerateRandomString();
+
+        OverlayWindow = ::CreateWindowExW(
                 WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
-                wc.lpszClassName, GenerateRandomString().c_str(), WS_POPUP,
+                WC.lpszClassName, WindowName.c_str(), WS_POPUP,
                 WindowPosX, WindowPosY, WindowSizeX, WindowSizeY,
-                nullptr, nullptr, wc.hInstance, nullptr
+                nullptr, nullptr, WC.hInstance, nullptr
         );
 
         if (OverlayWindow == NULL)
         {
-                Popup::Error("Window couldn't be created");
+                Popup::Error("Window couldn't be created, code: " + GetLastError());
                 return false;
         }
 
@@ -343,7 +351,7 @@ static bool HandleWindowAndDeviceCreation()
         if (!CreateDeviceD3D(OverlayWindow))
         {
                 CleanupDeviceD3D();
-                ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+                ::UnregisterClassW(WC.lpszClassName, WC.hInstance);
                 Popup::Error("Device couldn't be created");
                 return false;
         }
@@ -431,7 +439,7 @@ void Overlay::Run()
 
         CleanupDeviceD3D();
         ::DestroyWindow(OverlayWindow);
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        ::UnregisterClassW(WC.lpszClassName, WC.hInstance);
 
         TimerResolution::Reset();
 
