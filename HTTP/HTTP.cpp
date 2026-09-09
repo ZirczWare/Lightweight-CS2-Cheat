@@ -41,7 +41,7 @@ bool HTTP::Download(const char* URL, const char* Filename)
 	curl_easy_getinfo(curlCtx, CURLINFO_RESPONSE_CODE, &res_code);
 	if (!((res_code == 200 || res_code == 201) && rc != CURLE_ABORTED_BY_CALLBACK))
 	{
-		ErrorMessage = "Response code: " + res_code;
+		ErrorMessage = "Response code: " + std::to_string(res_code);
 		return false;
 	}
 
