@@ -1,31 +1,29 @@
 #include "../ImGui/imgui.h"
-#include "../ImGui/imgui_impl_win32.h"
 #include "../ImGui/imgui_impl_dx11.h"
+#include "../ImGui/imgui_impl_win32.h"
 
 #include "../Popup/Popup.h"
 #include "Overlay.h"
 
+#include "../Cache/Cache.h"
+#include "../Cheat/Cheat.h"
+#include "../Math/View.h"
+#include "../Memory/Memory.h"
+#include "../Offsets/Offsets.h"
+#include "../TimerResolution/TimerResolution.h"
+#include <chrono>
+#include <cstdint>
 #include <d3d11.h>
-#include <dxgi.h>
-#include <dwmapi.h>
-#include <dxgiformat.h>
 #include <d3dcommon.h>
+#include <dwmapi.h>
+#include <dxgi.h>
+#include <dxgiformat.h>
+#include <random>
+#include <string>
+#include <string_view>
+#include <thread>
 #include <Uxtheme.h>
 #include <Windows.h>
-#include <string>
-#include "../Cheat/Cheat.h"
-#include "../Offsets/Offsets.h"
-#include "../Math/View.h"
-#include "../Cache/Cache.h"
-#include <chrono>
-#include <thread>
-#include "../Console/Console.h"
-#include "../TimerResolution/TimerResolution.h"
-#include "../Memory/Memory.h"
-#include <random>
-#include <cstdint>
-#include <sal.h>
-#include <string_view>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -56,392 +54,392 @@ static WNDCLASSEXW WC{};
 
 static std::wstring GenerateRandomString()
 {
-        static constexpr std::string_view Charset =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+	static constexpr std::string_view Charset =
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
-        uint64_t State = []() {
-                std::random_device RandomDevice;
-                uint64_t Seed = (static_cast<uint64_t>(RandomDevice()) << 32) | RandomDevice();
-                return Seed ? Seed : 0x8ce7e7ec64121e45ULL;
-        }();
+	uint64_t State = []() {
+		std::random_device RandomDevice;
+		uint64_t Seed = (static_cast<uint64_t>(RandomDevice()) << 32) | RandomDevice();
+		return Seed ? Seed : 0x8ce7e7ec64121e45ULL;
+		}();
 
-        auto NextRandom = [&State]() -> uint64_t {
-                State ^= State >> 12;
-                State ^= State << 25;
-                State ^= State >> 27;
-                return State * 0xFD9113CCA137151DULL;
-        };
+	auto NextRandom = [&State]() -> uint64_t {
+		State ^= State >> 12;
+		State ^= State << 25;
+		State ^= State >> 27;
+		return State * 0xFD9113CCA137151DULL;
+		};
 
-        size_t TargetLength = 8 + static_cast<size_t>((NextRandom() & 0xFF) % 17);
+	size_t TargetLength = 8 + static_cast<size_t>((NextRandom() & 0xFF) % 17);
 
-        std::wstring ResultString;
-        ResultString.resize(TargetLength);
+	std::wstring ResultString;
+	ResultString.resize(TargetLength);
 
-        for (size_t Index = 0; Index < TargetLength; ++Index)
-                ResultString[Index] = Charset[NextRandom() & 63];
+	for (size_t Index = 0; Index < TargetLength; ++Index)
+		ResultString[Index] = Charset[NextRandom() & 63];
 
-        return ResultString;
+	return ResultString;
 }
 
 static void CreateRenderTarget()
 {
-        ID3D11Texture2D* pBackBuffer = nullptr;
-        if (SUCCEEDED(g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer))))
-        {
-                g_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
-                pBackBuffer->Release();
-        }
+	ID3D11Texture2D* pBackBuffer = nullptr;
+	if (SUCCEEDED(g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer))))
+	{
+		g_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
+		pBackBuffer->Release();
+	}
 }
 
 static void CleanupRenderTarget()
 {
-        if (g_mainRenderTargetView)
-        {
-                g_mainRenderTargetView->Release();
-                g_mainRenderTargetView = nullptr;
-        }
+	if (g_mainRenderTargetView)
+	{
+		g_mainRenderTargetView->Release();
+		g_mainRenderTargetView = nullptr;
+	}
 }
 
 static bool CreateDeviceD3D(HWND hWnd)
 {
-        DXGI_SWAP_CHAIN_DESC sd = {};
-        sd.BufferCount = 1;
-        sd.BufferDesc.Width = 0;
-        sd.BufferDesc.Height = 0;
-        sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        sd.BufferDesc.RefreshRate.Numerator = 60;
-        sd.BufferDesc.RefreshRate.Denominator = 1;
-        sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-        sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        sd.OutputWindow = hWnd;
-        sd.SampleDesc.Count = 1;
-        sd.SampleDesc.Quality = 0;
-        sd.Windowed = TRUE;
-        sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	DXGI_SWAP_CHAIN_DESC sd = {};
+	sd.BufferCount = 1;
+	sd.BufferDesc.Width = 0;
+	sd.BufferDesc.Height = 0;
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = hWnd;
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-        const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
-        D3D_FEATURE_LEVEL featureLevel;
+	const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
+	D3D_FEATURE_LEVEL featureLevel;
 
-        HRESULT res = D3D11CreateDeviceAndSwapChain(
-                nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_SINGLETHREADED,
-                featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain,
-                &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext
-        );
+	HRESULT res = D3D11CreateDeviceAndSwapChain(
+		nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_SINGLETHREADED,
+		featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain,
+		&g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext
+	);
 
-        if (FAILED(res))
-                return false;
+	if (FAILED(res))
+		return false;
 
-        CreateRenderTarget();
-        return true;
+	CreateRenderTarget();
+	return true;
 }
 
 static void CleanupDeviceD3D()
 {
-        CleanupRenderTarget();
+	CleanupRenderTarget();
 
-        if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = nullptr; }
-        if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = nullptr; }
-        if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
+	if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = nullptr; }
+	if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = nullptr; }
+	if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
 }
 
 static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-        if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-                return true;
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
 
-        switch (msg)
-        {
-        case WM_SYSCOMMAND:
-                if ((wParam & 0xfff0) == SC_KEYMENU)
-                        return 0;
-                break;
-        case WM_DESTROY:
-                ::PostQuitMessage(0);
-                return 0;
-        }
-        return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+	switch (msg)
+	{
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xfff0) == SC_KEYMENU)
+			return 0;
+		break;
+	case WM_DESTROY:
+		::PostQuitMessage(0);
+		return 0;
+	}
+	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 static void ResizeOverlay()
 {
-        if (g_pd3dDeviceContext == nullptr)
-                return;
+	if (g_pd3dDeviceContext == nullptr)
+		return;
 
-        CleanupRenderTarget();
-        g_pd3dDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-        g_pSwapChain->ResizeBuffers(0, WindowSizeX, WindowSizeY, DXGI_FORMAT_UNKNOWN, 0);
-        CreateRenderTarget();
+	CleanupRenderTarget();
+	g_pd3dDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	g_pSwapChain->ResizeBuffers(0, WindowSizeX, WindowSizeY, DXGI_FORMAT_UNKNOWN, 0);
+	CreateRenderTarget();
 
-        ::SetWindowPos(OverlayWindow, HWND_TOPMOST, WindowPosX, WindowPosY, WindowSizeX, WindowSizeY, SWP_SHOWWINDOW | SWP_NOACTIVATE);
+	::SetWindowPos(OverlayWindow, HWND_TOPMOST, WindowPosX, WindowPosY, WindowSizeX, WindowSizeY, SWP_SHOWWINDOW | SWP_NOACTIVATE);
 
-        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
+	g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 }
 
 static void UpdateTargetSize()
 {
-        POINT Point{};
-        ClientToScreen(TargetWindow, &Point);
+	POINT Point{};
+	ClientToScreen(TargetWindow, &Point);
 
-        RECT Rect{};
-        GetClientRect(TargetWindow, &Rect);
+	RECT Rect{};
+	GetClientRect(TargetWindow, &Rect);
 
-        if (WindowPosX == Point.x && WindowPosY == Point.y && WindowSizeX == Rect.right && WindowSizeY == Rect.bottom)
-                return;
+	if (WindowPosX == Point.x && WindowPosY == Point.y && WindowSizeX == Rect.right && WindowSizeY == Rect.bottom)
+		return;
 
-        WindowPosX = Point.x;
-        WindowPosY = Point.y;
-        WindowSizeX = Rect.right;
-        WindowSizeY = Rect.bottom;
+	WindowPosX = Point.x;
+	WindowPosY = Point.y;
+	WindowSizeX = Rect.right;
+	WindowSizeY = Rect.bottom;
 
-        View::ScreenCenter.x = WindowSizeX * 0.5f;
-        View::ScreenCenter.y = WindowSizeY * 0.5f;
+	View::ScreenCenter.x = WindowSizeX * 0.5f;
+	View::ScreenCenter.y = WindowSizeY * 0.5f;
 
-        ResizeOverlay();
+	ResizeOverlay();
 }
 
 static HWND GetTarget()
 {
-        if (IsWindow(TargetWindow))
-                return TargetWindow;
-        
-        TargetWindow = FindWindowA(TargetClass, TargetName);
+	if (IsWindow(TargetWindow))
+		return TargetWindow;
 
-        return TargetWindow;
+	TargetWindow = FindWindowA(TargetClass, TargetName);
+
+	return TargetWindow;
 }
 
 static bool AttachToTarget(const LPCSTR& TargetClassParam, const LPCSTR& TargetNameParam)
 {
-        TargetClass = TargetClassParam;
-        TargetName = TargetNameParam;
+	TargetClass = TargetClassParam;
+	TargetName = TargetNameParam;
 
-        TargetWindow = GetTarget();
+	TargetWindow = GetTarget();
 
-        if (TargetWindow == NULL)
-                return false;
+	if (TargetWindow == NULL)
+		return false;
 
-        UpdateTargetSize();
+	UpdateTargetSize();
 
-        return true;
+	return true;
 }
 
 static bool PeekMessageQuit()
 {
-        MSG msg;
-        while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
-        {
-                ::TranslateMessage(&msg);
-                ::DispatchMessage(&msg);
-                if (msg.message == WM_QUIT)
-                        return true;
-        }
-        return false;
+	MSG msg;
+	while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+	{
+		::TranslateMessage(&msg);
+		::DispatchMessage(&msg);
+		if (msg.message == WM_QUIT)
+			return true;
+	}
+	return false;
 }
 
 static bool UpdateTargetNow()
 {
-        if (GetTarget() == NULL)
-                return false;
+	if (GetTarget() == NULL)
+		return false;
 
-        UpdateTargetSize();
+	UpdateTargetSize();
 
-        return true;
+	return true;
 }
 
 static bool UpdateTargetPeriodically()
 {
-        static ULONGLONG LastUpdate = 0;
-        ULONGLONG CurrentTick = GetTickCount64();
+	static ULONGLONG LastUpdate = 0;
+	ULONGLONG CurrentTick = GetTickCount64();
 
-        if (CurrentTick - LastUpdate > 200)
-        {
-                LastUpdate = CurrentTick;
+	if (CurrentTick - LastUpdate > 200)
+	{
+		LastUpdate = CurrentTick;
 
-                if (not UpdateTargetNow())
-                        return false;
+		if (not UpdateTargetNow())
+			return false;
 
-                bool TargetWasInForeground = TargetInForeground;
-                TargetInForeground = GetForegroundWindow() == TargetWindow;
+		bool TargetWasInForeground = TargetInForeground;
+		TargetInForeground = GetForegroundWindow() == TargetWindow;
 
-                if (not TargetWasInForeground and TargetInForeground)
-                        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
-        }
+		if (not TargetWasInForeground and TargetInForeground)
+			g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
+	}
 
-        return true;
+	return true;
 }
 
 static bool HandleStartup()
 {
-        if (!Memory::Attach())
-        {
-                Popup::Error("Couldn't attach memory reader to target");
-                return false;
-        }
+	if (!Memory::Attach())
+	{
+		Popup::Error("Couldn't attach memory reader to target");
+		return false;
+	}
 
-        if (!TimerResolution::Set())
-        {
-                Popup::Error("Couldn't set timer resolution");
-                return false;
-        }
+	if (!TimerResolution::Set())
+	{
+		Popup::Error("Couldn't set timer resolution");
+		return false;
+	}
 
-        return true;
+	return true;
 }
 
 static bool HandleInits()
 {
-        bool Success;
+	bool Success;
 
-        Success = Offsets::Init();
-        if (!Success)
-        {
-                Popup::Error(Offsets::GetError());
-                return false;
-        }
+	Success = Offsets::Init();
+	if (!Success)
+	{
+		Popup::Error(Offsets::GetError());
+		return false;
+	}
 
-        Cache::Init();
+	Cache::Init();
 
-        return true;
+	return true;
 }
 
 static bool HandleWindowCreation()
 {
-        std::wstring ClassName = GenerateRandomString();
+	std::wstring ClassName = GenerateRandomString();
 
-        WC = {
-                sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L,
-                GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
-                ClassName.c_str(), nullptr
-        };
+	WC = {
+		sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L,
+		GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr,
+		ClassName.c_str(), nullptr
+	};
 
-        if (!::RegisterClassExW(&WC)) {
-                Popup::Error("Window class coudln't be registered, code: " + std::to_string(GetLastError()));
-                return false;
-        }
+	if (!::RegisterClassExW(&WC)) {
+		Popup::Error("Window class coudln't be registered, code: " + std::to_string(GetLastError()));
+		return false;
+	}
 
-        std::wstring WindowName = GenerateRandomString();
+	std::wstring WindowName = GenerateRandomString();
 
-        OverlayWindow = ::CreateWindowExW(
-                WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
-                WC.lpszClassName, WindowName.c_str(), WS_POPUP,
-                WindowPosX, WindowPosY, WindowSizeX, WindowSizeY,
-                nullptr, nullptr, WC.hInstance, nullptr
-        );
+	OverlayWindow = ::CreateWindowExW(
+		WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
+		WC.lpszClassName, WindowName.c_str(), WS_POPUP,
+		WindowPosX, WindowPosY, WindowSizeX, WindowSizeY,
+		nullptr, nullptr, WC.hInstance, nullptr
+	);
 
-        if (OverlayWindow == NULL)
-        {
-                Popup::Error("Window couldn't be created, code: " + std::to_string(GetLastError()));
-                return false;
-        }
+	if (OverlayWindow == NULL)
+	{
+		Popup::Error("Window couldn't be created, code: " + std::to_string(GetLastError()));
+		return false;
+	}
 
-        return true;
+	return true;
 }
 
 static bool HandleWindowAndDeviceCreation()
 {
-        bool WindowInBandCreated = HandleWindowCreation();
-        if (!WindowInBandCreated)
-                return false;
+	bool WindowInBandCreated = HandleWindowCreation();
+	if (!WindowInBandCreated)
+		return false;
 
-        LONG_PTR exStyle = GetWindowLongPtr(OverlayWindow, GWL_EXSTYLE);
-        ::SetWindowLongPtr(OverlayWindow, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
-        ::SetLayeredWindowAttributes(OverlayWindow, RGB(0, 0, 0), 255, LWA_ALPHA);
+	LONG_PTR exStyle = GetWindowLongPtr(OverlayWindow, GWL_EXSTYLE);
+	::SetWindowLongPtr(OverlayWindow, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+	::SetLayeredWindowAttributes(OverlayWindow, RGB(0, 0, 0), 255, LWA_ALPHA);
 
-        MARGINS margins = { -1 };
-        ::DwmExtendFrameIntoClientArea(OverlayWindow, &margins);
+	MARGINS margins = { -1 };
+	::DwmExtendFrameIntoClientArea(OverlayWindow, &margins);
 
-        if (!CreateDeviceD3D(OverlayWindow))
-        {
-                CleanupDeviceD3D();
-                ::UnregisterClassW(WC.lpszClassName, WC.hInstance);
-                Popup::Error("Device couldn't be created");
-                return false;
-        }
+	if (!CreateDeviceD3D(OverlayWindow))
+	{
+		CleanupDeviceD3D();
+		::UnregisterClassW(WC.lpszClassName, WC.hInstance);
+		Popup::Error("Device couldn't be created");
+		return false;
+	}
 
-        ::ShowWindow(OverlayWindow, SW_SHOWDEFAULT);
-        ::UpdateWindow(OverlayWindow);
+	::ShowWindow(OverlayWindow, SW_SHOWDEFAULT);
+	::UpdateWindow(OverlayWindow);
 
-        ImGui::CreateContext();
+	ImGui::CreateContext();
 
-        ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = nullptr;
+	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = nullptr;
 
-        ImGui_ImplWin32_Init(OverlayWindow);
-        ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+	ImGui_ImplWin32_Init(OverlayWindow);
+	ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-        return true;
+	return true;
 }
 
 void Overlay::Run()
 {
-        bool SuccessfulStartup = HandleStartup();
-        if (!SuccessfulStartup)
-                return;
+	bool SuccessfulStartup = HandleStartup();
+	if (!SuccessfulStartup)
+		return;
 
-        if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
-        {
-                Popup::Error("Couldn't attach overlay to target");
-                return;
-        }
+	if (!AttachToTarget("SDL_app", "Counter-Strike 2"))
+	{
+		Popup::Error("Couldn't attach overlay to target");
+		return;
+	}
 
-        ImGui_ImplWin32_EnableDpiAwareness();
+	ImGui_ImplWin32_EnableDpiAwareness();
 
-        bool WindowAndDeviceCreated = HandleWindowAndDeviceCreation();
-        if (!WindowAndDeviceCreated)
-                return;
+	bool WindowAndDeviceCreated = HandleWindowAndDeviceCreation();
+	if (!WindowAndDeviceCreated)
+		return;
 
-        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
+	g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 
-        bool SuccessfullyInited = HandleInits();
-        if (!SuccessfullyInited)
-                return;
+	bool SuccessfullyInited = HandleInits();
+	if (!SuccessfullyInited)
+		return;
 
-        Beep(750, 1000);
+	Beep(750, 1000);
 
-        while (true)
-        {
-                std::this_thread::sleep_for(std::chrono::milliseconds(15));
+	while (true)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(15));
 
-                if (PeekMessageQuit())
-                        break;
+		if (PeekMessageQuit())
+			break;
 
-                if (GetAsyncKeyState(VK_PAUSE) & 0x8000)
-                        break;
+		if (GetAsyncKeyState(VK_PAUSE) & 0x8000)
+			break;
 
-                if (not UpdateTargetPeriodically())
-                        break;
+		if (not UpdateTargetPeriodically())
+			break;
 
-                if (not TargetInForeground)
-                {
-                        ::Sleep(20);
-                        continue;
-                }
+		if (not TargetInForeground)
+		{
+			::Sleep(20);
+			continue;
+		}
 
-                ImGui_ImplDX11_NewFrame();
-                ImGui_ImplWin32_NewFrame();
-                ImGui::NewFrame();
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
-                Cheat::Run();
+		Cheat::Run();
 
-                ImGui::Render();
+		ImGui::Render();
 
-                const float clear_color_transparent[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-                g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_transparent);
+		const float clear_color_transparent[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_transparent);
 
-                ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-                g_pSwapChain->Present(0, 0);
-        }
+		g_pSwapChain->Present(0, 0);
+	}
 
-        Cache::Shutdown();
+	Cache::Shutdown();
 
-        ImGui_ImplDX11_Shutdown();
-        ImGui_ImplWin32_Shutdown();
-        ImGui::DestroyContext();
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
-        CleanupDeviceD3D();
-        ::DestroyWindow(OverlayWindow);
-        ::UnregisterClassW(WC.lpszClassName, WC.hInstance);
+	CleanupDeviceD3D();
+	::DestroyWindow(OverlayWindow);
+	::UnregisterClassW(WC.lpszClassName, WC.hInstance);
 
-        TimerResolution::Reset();
+	TimerResolution::Reset();
 
-        Beep(750, 1000);
+	Beep(750, 1000);
 }

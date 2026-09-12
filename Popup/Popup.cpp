@@ -1,6 +1,6 @@
 #include "Popup.h"
-#include <Windows.h>
 #include <string_view>
+#include <Windows.h>
 
 void Popup::Error(std::string_view message)
 {

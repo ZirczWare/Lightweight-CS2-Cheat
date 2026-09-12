@@ -1,6 +1,6 @@
 #include "JSON.h"
-#include <nlohmann/json.hpp>
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 JSONRESULT JSON::LoadFromDisk(nlohmann::json& j, const char* Filepath)
 {

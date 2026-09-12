@@ -1,8 +1,8 @@
-#include "Cheat.h"
-#include "../ImGui/imgui.h"
-#include <mutex>
-#include "../Render/Render.h"
 #include "../Cache/Cache.h"
+#include "../ImGui/imgui.h"
+#include "../Render/Render.h"
+#include "Cheat.h"
+#include <mutex>
 
 void Cheat::Run()
 {
@@ -12,8 +12,8 @@ void Cheat::Run()
 	}
 
 	const auto& RenderData = Render::FrontBuffer;
+	const auto& drawList = ImGui::GetBackgroundDrawList();
 
-	ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 	for (size_t i = 0; i < RenderData.Count; i++)
 	{
 		if (!RenderData.VisibleOnScreen[i])

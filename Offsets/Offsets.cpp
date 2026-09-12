@@ -1,12 +1,11 @@
-#include "Offsets.h"
+#include "../A2X Dumper/A2XDumper.h"
 #include "../HTTP/HTTP.h"
 #include "../JSON/JSON.h"
 #include "../Memory/Memory.h"
-#include <nlohmann/json.hpp>
+#include "Offsets.h"
 #include <filesystem>
 #include <fstream>
-#include "../A2X Dumper/A2XDumper.h"
-#include "../Console/Console.h"
+#include <nlohmann/json.hpp>
 
 using nlohmann::json;
 using namespace std;

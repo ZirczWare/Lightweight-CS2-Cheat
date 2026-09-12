@@ -1,24 +1,23 @@
+#include "../Entity/Entity.h"
+#include "../Math/Vector3.h"
+#include "../Math/View.h"
+#include "../Memory/Memory.h"
+#include "../Offsets/Offsets.h"
+#include "../Render/Render.h"
 #include "Cache.h"
 #include <atomic>
-#include <thread>
-#include <mutex>
-#include "../Render/Render.h"
 #include <chrono>
 #include <cstdarg>
 #include <cstdint>
-#include "../Offsets/Offsets.h"
-#include "../Console/Console.h"
-#include "../Math/View.h"
-#include "../Memory/Memory.h"
-#include "../Math/Vector3.h"
-#include "../Entity/Entity.h"
+#include <mutex>
+#include <thread>
 
 static std::atomic<bool> ThreadsShouldRun{ false };
 static std::thread FrequentUpdateThread;
 static std::thread SlowUpdateThread;
 
 static Entity::Data Enemies[Entity::MAX_ENEMIES];
-static size_t EnemiesCount = 0;
+static std::uint8_t EnemiesCount = 0;
 
 static void FrequentUpdate()
 {
@@ -45,7 +44,9 @@ static void FrequentUpdate()
 				continue;
 
 			Heads[i] = { Origins[i].x, Origins[i].y, Origins[i].z + 72.f };
-			View::WorldToScreen(Heads[i], ScreenHeads[i]);
+			LocalRenderData.VisibleOnScreen[i] = View::WorldToScreen(Heads[i], ScreenHeads[i]);
+			if (!LocalRenderData.VisibleOnScreen[i])
+				continue;
 
 			float Width = ScreenOrigins[i].Distance(ScreenHeads[i]) * 0.45f * 0.5f;
 
@@ -59,11 +60,9 @@ static void FrequentUpdate()
 		}
 
 		LocalRenderData.Count = EnemiesCount;
-			
-		{
-			std::lock_guard<std::mutex> lock(Cache::Mutex);
-			Render::BackBuffer = LocalRenderData;
-		}
+
+		std::lock_guard<std::mutex> lock(Cache::Mutex);
+		Render::BackBuffer = LocalRenderData;
 	}
 }
 
@@ -90,7 +89,7 @@ static void SlowUpdate()
 		if (!EntityList)
 			continue;
 
-		size_t LocalEnemiesCount = 0;
+		std::uint8_t LocalEnemiesCount = 0;
 
 		for (int i = 1; i < Entity::MAX_ENTITIES; i++) // First index is skippable
 		{
@@ -139,7 +138,7 @@ static void SlowUpdate()
 			uintptr_t GameSceneNode{};
 			Memory::Read(Pawn + Offsets::C_BaseEntity::m_pGameSceneNode, GameSceneNode);
 			if (!GameSceneNode)
-				break;
+				continue;
 
 			LocalEnemies[LocalEnemiesCount].AbsOriginAddress = GameSceneNode + Offsets::CGameSceneNode::m_vecOrigin;
 			LocalEnemiesCount++;

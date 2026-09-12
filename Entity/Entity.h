@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include <cstdarg>
+#include <cstdint>
 
 namespace Entity
 {
@@ -10,6 +10,6 @@ namespace Entity
 		std::uintptr_t AbsOriginAddress{};
 	};
 
-	constexpr int MAX_ENTITIES = 64;
-	constexpr int MAX_ENEMIES = MAX_ENTITIES / 2;
+	constexpr std::uint8_t MAX_ENTITIES = 64;
+	constexpr std::uint8_t MAX_ENEMIES = MAX_ENTITIES / 2;
 }

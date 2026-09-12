@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../ImGui/imgui.h"
 #include "Vector3.h"
 #include <immintrin.h>
-#include "../ImGui/imgui.h"
 
 namespace View
 {
