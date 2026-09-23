@@ -31,7 +31,7 @@ static bool GetModuleAddresses(DWORD dwPid, std::vector<DLL>& Modules)
 	{
 		auto it = std::find_if(Modules.begin(), Modules.end(), [&](const DLL& dll) {
 			return _wcsicmp(dll.Name, moduleEntry.szModule) == 0;
-			});
+		});
 		if (it != Modules.end())
 		{
 			*it->Address = reinterpret_cast<std::uint64_t>(moduleEntry.modBaseAddr);

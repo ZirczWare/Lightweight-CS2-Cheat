@@ -21,8 +21,8 @@ constexpr const char* OFFSETS_FILENAME = "offsets.json";
 
 constexpr const char* OLD_BUILDNUMBER_FILENAME = "build.info";
 
-static int64_t OldBuildNumber = 0;
-static int64_t NewBuildNumber = 0;
+static int32_t OldBuildNumber = 0;
+static int32_t NewBuildNumber = 0;
 
 static string ErrorMessage = "";
 
