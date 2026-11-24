@@ -264,7 +264,7 @@ static bool RemovePreviousJSONFiles()
 	return true;
 }
 
-static bool LoadOffsetsAndUpdatBuildnumber()
+static bool LoadOffsetsAndUpdateBuildnumber()
 {
 	bool LoadedAllOffsets = LoadAllOffsets();
 	if (!LoadedAllOffsets)
@@ -331,7 +331,7 @@ bool Offsets::Init()
 	JSONLocalLoadingSuccess = HandleJSONLoadingLocally();
 	if (JSONLocalLoadingSuccess)
 	{
-		LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
+		LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdateBuildnumber();
 		if (LoadedOffsetsAndUpdatedBuildnumber)
 			return true;
 	}
@@ -344,7 +344,7 @@ bool Offsets::Init()
 	if (!JSONWebLoadingSuccess)
 		return false;
 
-	LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdatBuildnumber();
+	LoadedOffsetsAndUpdatedBuildnumber = LoadOffsetsAndUpdateBuildnumber();
 	if (!LoadedOffsetsAndUpdatedBuildnumber)
 		return false;
 
